@@ -10,8 +10,6 @@ import java.util.*;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.io.File;
-
-import javax.swing.JDialog;
 //import java.awt.geom.Line2D;
 
 
@@ -39,51 +37,49 @@ public class GameEx extends JPanel {
 	public Rectangle screen, bird, wall, top, bot, left, right, cat ;
 	public Rectangle bounds ; 
 	public Rectangle[][] maps = new Rectangle[2][5];
-	public int x_pos=550 , y_pos=100, spdU, spdD, spdR, spdL, Lvl=0, jump=9;
+	public int x_pos=550 , y_pos=100, spdU, spdD, spdR, spdL, Lvl=0, jump=5;
 	public boolean[] keys = new boolean[256];
 	public boolean keyL, keyR, keyU, keyD, swap, got_seed ;
 	BufferedImage bird_img, seeds, wood, cat_img;
 
 	public GameEx()  {
 		
-
 		KeyListener listener = new MyKeyListener();
 		addKeyListener(listener);
 		setFocusable(true);
-		screen = new Rectangle(0, 0, 700, 500);
-		bird = new Rectangle(x_pos,  y_pos, 10, 10);
-		cat = new Rectangle(50,  410, 10, 10);
-		bounds = new Rectangle(50, 50, 600, 400);
-		frame = new JFrame("Bird Game");
+		screen   = new Rectangle(0, 0, 700, 500);
+		bird     = new Rectangle(x_pos,  y_pos, 10, 10);
+		cat      = new Rectangle(50,  410, 10, 10);
+		bounds   = new Rectangle(50, 50, 600, 400);
+		frame    = new JFrame("Bird Game");
 		got_seed = false;
 		
-		//this is where I program the map. This needs to be cleaned up if I want to make a big game. 
-		//I can do away with arr and just put it directly in maps. 
-		//IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
-		
-		//level0
+		// IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
+		// The maps array are the blocks in the level
+		// Level 0
 		maps[0][0]=new Rectangle(10,200,300,50);
 		maps[0][1]=new Rectangle(350,300,50,50);
 		maps[0][2]=new Rectangle(400,350,50,50);
 		maps[0][3]=new Rectangle(0,0,0,0);
 		maps[0][4]=new Rectangle(0,0,0,0);
 		
-		//level1
+		// Level 1
 		maps[1][0]=new Rectangle(550,200,100,50); 
 		maps[1][1]=new Rectangle(50,150,150,50);
 		maps[1][2]=new Rectangle(320,260,50,50);
 		maps[1][3]=new Rectangle(270,170,50,50);
 		maps[1][4]=new Rectangle(0,0,0,0);
 
-		
 		vgTask = new VGTimerTask();	
 			    
-	    //start the music and load the sprites
+	    // Start the music and load the sprites
 	    try {
-	    	bird_img = ImageIO.read(new File("sprite.png"));
-	    	seeds = ImageIO.read(new File("seeds.png"));
-	    	wood = ImageIO.read(new File("wood.png"));
-	    	cat_img = ImageIO.read(new File("cat.png"));
+	    	// TODO the convention in java for variables is lower camel case
+	    	// i.e. birdImg
+	    	bird_img = ImageIO.read(new File("sprite.png")); // Main character
+	    	seeds    = ImageIO.read(new File("seeds.png"));  // Have to get these to beat the level
+	    	wood     = ImageIO.read(new File("wood.png"));   // The image for the blocks
+	    	cat_img  = ImageIO.read(new File("cat.png"));    // Bad guyi
 	        // Open an audio input stream.
 	    	File soundFile = new File("little.wav");
 	    	AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
@@ -112,11 +108,9 @@ public class GameEx extends JPanel {
 	public void paint(Graphics g){
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D)g;
-		
 		//bounds = g.getClipBounds();
 
 		g2d.clearRect(screen.x,  screen.y,  screen.width, screen.height);
-		g2d.setColor(Color.blue);
 		//g2d.fill(box);
 		
 		//bird is 50 wide by 48 height
@@ -260,7 +254,11 @@ public class GameEx extends JPanel {
 	}
 	
 	public void processEnemy(){
-		
+		if (getCatX()<60){
+			setCatX(getCatX()+10);
+		} else if (getCatX()>200) {
+			setCatX(getCatX()-10);
+		}
 	}
 	
 	//Below are where things are run
