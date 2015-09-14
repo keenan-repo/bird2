@@ -67,18 +67,19 @@ public class GameEx extends Canvas implements Runnable {
 	BufferedImage birdImg, seeds, wood, catImg;
 	
 	
-	// This will be untilized with the sprite sheet
+	// This will be utilized with the sprite sheet
+	
+	private Player p;
+	
 	public void init(){
-	    /*BufferedImageLoader loader = new BufferedImageLoader();
+	   /* BufferedImageLoader loader = new BufferedImageLoader();
 	    try{	        
 	        spriteSheet = loader.loadImage("/sprite_sheet.png");	        
 	    }catch(IOException e){
 	        e.printStackTrace();
 	    }
 	    
-	    SpriteSheet ss = new SpriteSheet(spriteSheet);
-	    bird = ss.grabImage(1, 1, 32, 32);
-	    */
+        p = new Player (200, 200, this); */
 	}
 	
 	// I barely understand how the next bit works until after run() so don't worry
@@ -139,6 +140,7 @@ public class GameEx extends Canvas implements Runnable {
    private void tick() {
        // TODO create the level tracker and put it here. This will start out by switching levels when the bird is in the 
        // right spot. Later it will maybe handle moving the screen along with the bird.
+       //p.tick();
        look();
        processInput();
            }
@@ -216,6 +218,7 @@ public class GameEx extends Canvas implements Runnable {
 	       }
 	       
 	       Graphics g = bs.getDrawGraphics();
+	       //p.render(g);
 	       //draws the black screen
 	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 	       Graphics2D g2d = (Graphics2D)g;
@@ -301,7 +304,7 @@ public class GameEx extends Canvas implements Runnable {
 	void look() {
 
 		 // The default amount of pixels movement in the specified directions
-		 spdU = 30; spdD = 5; spdR = 10; spdL = 10;
+		 spdU = 30; spdD = 10; spdR = 10; spdL = 10;
 		 
 		 // Loop through the objects in the map and see if the any of them interesect with the collision boxes
 		 for(int i = 0 ; i < blocks[1].length; i++){
@@ -526,6 +529,10 @@ public class GameEx extends Canvas implements Runnable {
 	     } catch (LineUnavailableException e) {
 	        e.printStackTrace();
 	     }		
+	}
+	
+	public BufferedImage getSpriteSheet(){
+	    return spriteSheet;
 	}
 
 }
