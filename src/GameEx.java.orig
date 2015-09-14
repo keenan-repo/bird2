@@ -523,6 +523,7 @@ public class GameEx extends Canvas implements Runnable {
 		JFrame frame = new JFrame(game.TITLE);
 		frame.add(game);
 		frame.pack();
+		
 		//Set up the frame
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
 		frame.setResizable(false);
