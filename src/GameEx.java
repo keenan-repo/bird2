@@ -41,7 +41,7 @@ import javax.swing.JPanel;
  */
 
 @SuppressWarnings("serial")
-<<<<<<< HEAD
+
 public class GameEx extends Canvas implements Runnable {
 	
 	public static final int WIDTH = 700;
@@ -59,15 +59,7 @@ public class GameEx extends Canvas implements Runnable {
 	public Rectangle screen, bird, wall, top, bot, left, right, cat;
 	public Rectangle bounds; 
 	public Rectangle[][] blocks = new Rectangle[2][5];
-=======
-class GameEx extends JPanel {
-	
-	private VGTimerTask vgTask;
-	private JFrame frame;
-	private Rectangle screen, bird, wall, top, bot, left, right, cat;
-	private Rectangle bounds; 
-	private Rectangle[][] blocks = new Rectangle[2][5];
->>>>>>> changed public methods, classes and variables to only have the minimal amount of access they need
+
 	// we don't need a up and down speed. We can just have a vertical speed
 	// that can be positive and negative
 	private int xPos = 550 , yPos = 100, spdU, spdD, spdR, spdL, lvl = 0, jump = 5;
@@ -299,7 +291,7 @@ class GameEx extends JPanel {
 		 
 
 	
-<<<<<<< HEAD
+
 	private void render() {
 		// TODO Auto-generated method stub
 		BufferStrategy bs = this.getBufferStrategy();
@@ -401,12 +393,7 @@ class GameEx extends JPanel {
 		 	}
 
 
-
-
-	public class MyKeyListener implements KeyListener {
-=======
 	private class MyKeyListener implements KeyListener {
->>>>>>> changed public methods, classes and variables to only have the minimal amount of access they need
 
 		public void keyPressed(KeyEvent e) {
 		    keys[e.getKeyCode()] = true;
@@ -425,21 +412,8 @@ class GameEx extends JPanel {
 		public void keyTyped(KeyEvent e) {
 		}	
 	}
-	// TODO I don't know what this is, needs a comment
-<<<<<<< HEAD
 
-=======
-	void update(LineEvent le) {
-	    LineEvent.Type type = le.getType();
-	    if (type == LineEvent.Type.OPEN) {
-	      System.out.println("OPEN");
-	    } else if (type == LineEvent.Type.CLOSE) {
-	      System.out.println("CLOSE");
-	      System.exit(0);
-	    } 
-	  }
-	
->>>>>>> changed public methods, classes and variables to only have the minimal amount of access they need
+
 	public static void main(String[] args) {
 		GameEx game = new GameEx();
 	
@@ -571,4 +545,5 @@ class GameEx extends JPanel {
 	        e.printStackTrace();
 	     }		
 	}
+
 }
