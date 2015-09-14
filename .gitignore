@@ -1,2 +1,4 @@
+#Trying to ignore the binary files
 bin\
+*.o
 /little.wav
