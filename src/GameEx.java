@@ -10,23 +10,20 @@ import java.util.*;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.io.File;
-//import java.awt.geom.Line2D;
-
-
-
 
 import javax.imageio.ImageIO;
 
-import java.io.*;
+import java.io.*; // TODO, shouldn't import everything like this, only what is needed
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-
-//import javax.swing.WindowConstants;
-
 import java.awt.*;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+// TODO, rename variables
+// put in getters and setters
+// TODO change all public shit to private
 
 /*
  * Conventions
@@ -43,15 +40,15 @@ public class GameEx extends JPanel {
 	
 	public VGTimerTask vgTask;
 	public JFrame frame;
-	public Rectangle screen, bird, wall, top, bot, left, right, cat ;
-	public Rectangle bounds ; 
-	public Rectangle[][] maps = new Rectangle[2][5];
+	public Rectangle screen, bird, wall, top, bot, left, right, cat;
+	public Rectangle bounds; 
+	public Rectangle[][] blocks = new Rectangle[2][5];
 	// we don't need a up and down speed. We can just have a vertical speed
 	// that can be positive and negative
-	public int x_pos=550 , y_pos=100, spdU, spdD, spdR, spdL, Lvl=0, jump=5;
+	public int xPos = 550 , yPos = 100, spdU, spdD, spdR, spdL, lvl = 0, jump = 5;
 	public boolean[] keys = new boolean[256];
-	public boolean keyL, keyR, keyU, keyD, swap, got_seed ;
-	BufferedImage bird_img, seeds, wood, cat_img;
+	public boolean keyL, keyR, keyU, keyD, swap, gotSeed ;
+	BufferedImage birdImg, seeds, wood, catImg;
 
 	public GameEx()  {
 		
@@ -59,38 +56,39 @@ public class GameEx extends JPanel {
 		addKeyListener(listener);
 		setFocusable(true);
 		screen   = new Rectangle(0, 0, 700, 500);
-		bird     = new Rectangle(x_pos,  y_pos, 10, 10);
+		bird     = new Rectangle(xPos,  yPos, 10, 10);
 		cat      = new Rectangle(50,  410, 10, 10);
 		bounds   = new Rectangle(50, 50, 600, 400);
 		frame    = new JFrame("Bird Game");
-		got_seed = false;
+		gotSeed  = false;
 		
 		// IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
-		// The maps array are the blocks in the level
+		// well...it doesn't. Each... level could have it's own length of blocks and we could just loop through that.
+		// It could be a 1 d array of arrays. Then the arrays can be different lengths (I think)
+		// The blocks array are the blocks in the level
 		// Level 0
-		maps[0][0]=new Rectangle(10,200,300,50);
-		maps[0][1]=new Rectangle(350,300,50,50);
-		maps[0][2]=new Rectangle(400,350,50,50);
-		maps[0][3]=new Rectangle(0,0,0,0);
-		maps[0][4]=new Rectangle(0,0,0,0);
+		blocks[0][0] = new Rectangle(10,200,300,50);
+		blocks[0][1] = new Rectangle(350,300,50,50);
+		blocks[0][2] = new Rectangle(400,350,50,50);
+		blocks[0][3] = new Rectangle(0,0,0,0);
+		blocks[0][4] = new Rectangle(0,0,0,0);
 		
 		// Level 1
-		maps[1][0]=new Rectangle(550,200,100,50); 
-		maps[1][1]=new Rectangle(50,150,150,50);
-		maps[1][2]=new Rectangle(320,260,50,50);
-		maps[1][3]=new Rectangle(270,170,50,50);
-		maps[1][4]=new Rectangle(0,0,0,0);
+		blocks[1][0] = new Rectangle(550,200,100,50); 
+		blocks[1][1] = new Rectangle(50,150,150,50);
+		blocks[1][2] = new Rectangle(320,260,50,50);
+		blocks[1][3] = new Rectangle(270,170,50,50);
+		blocks[1][4] = new Rectangle(0,0,0,0);
 
 		vgTask = new VGTimerTask();	
 			    
 	    // Start the music and load the sprites
 	    try {
-	    	// TODO the convention in java for variables is lower camel case
-	    	// i.e. birdImg
-	    	bird_img = ImageIO.read(new File("sprite.png")); // Main character
-	    	seeds    = ImageIO.read(new File("seeds.png"));  // Have to get these to beat the level
-	    	wood     = ImageIO.read(new File("wood.png"));   // The image for the blocks
-	    	cat_img  = ImageIO.read(new File("cat.png"));    // Bad guy
+	    	birdImg = ImageIO.read(new File("bird.png"));  // Main character bird image
+	    	seeds   = ImageIO.read(new File("seeds.png")); // Seeds  image
+	    	wood    = ImageIO.read(new File("wood.png"));  // Blocks image
+	    	catImg  = ImageIO.read(new File("cat.png"));   // Bad guy cat image
+	    	
 	        // Open an audio input stream.
 	    	File soundFile = new File("Shy-Animal2.wav");
 	    	AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
@@ -98,7 +96,7 @@ public class GameEx extends JPanel {
 	        Clip clip = AudioSystem.getClip();
 	        // Open audio clip and load samples from the audio input stream.
 	        clip.open(audioIn);
-	        clip.loop(clip.LOOP_CONTINUOUSLY);
+	        clip.loop(Clip.LOOP_CONTINUOUSLY);
 	     } catch (UnsupportedAudioFileException e) {
 	        e.printStackTrace();
 	     } catch (IOException e) {
@@ -108,10 +106,10 @@ public class GameEx extends JPanel {
 	     }
 	    
 	    // Hit box. This should be turned into an array as well
-		top   = new Rectangle(getBirdX(), getBirdY() - 10, bird_img.getWidth(), 10);
-		bot   = new Rectangle(getBirdX(), getBirdY() + bird_img.getHeight(), bird_img.getWidth(), 10);
-		left  = new Rectangle(getBirdX() - 10,  getBirdY(), 10, bird_img.getHeight());
-		right = new Rectangle(getBirdX()+bird_img.getWidth(),  getBirdY(), 10, bird_img.getHeight());
+		top   = new Rectangle(getBirdX(), getBirdY() - 10, birdImg.getWidth(), 10);
+		bot   = new Rectangle(getBirdX(), getBirdY() + birdImg.getHeight(), birdImg.getWidth(), 10);
+		left  = new Rectangle(getBirdX() - 10,  getBirdY(), 10, birdImg.getHeight());
+		right = new Rectangle(getBirdX() + birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 	}
 	
 	public void paint(Graphics g){
@@ -130,17 +128,17 @@ public class GameEx extends JPanel {
 		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
 
 		if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
-			tx.translate(- bird_img.getWidth(null), 0);
+			tx.translate(- birdImg.getWidth(null), 0);
 			AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-			bird_img = op.filter(bird_img, null); 
+			birdImg = op.filter(birdImg, null); 
 			swap = false;
 	    } 
 		
-		g2d.drawImage(bird_img, getBirdX(), getBirdY(), null); // Draw the bird
-		g2d.drawImage(cat_img, getCatX(), getCatY(), null);    // Draw the cat
+		g2d.drawImage(birdImg, getBirdX(), getBirdY(), null); // Draw the bird
+		g2d.drawImage(catImg, getCatX(), getCatY(), null);    // Draw the cat
 
 		//enable this to see the birds coordinates
-		//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " Lvl= " + Lvl);
+		//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " lvl= " + lvl);
 		
 		// It would be better if we could "scroll" so the level is continuously loading.
 		// We could do this by setting the coordinates of some of the blocks to have negative x
@@ -148,32 +146,32 @@ public class GameEx extends JPanel {
 		
 		// If the bird is on the block at the left edge of the screen and the level is equal to 0. 
 		// we want to transition to level 1. So set the bird to the right side of the screen and load level 1	
-		if (getBirdX() == 50 && getBirdY() == 150 && Lvl == 0){
-			Lvl=1;
+		if (getBirdX() == 50 && getBirdY() == 150 && lvl == 0){
+			lvl=1;
 			setBirdX(590); // this should be a variable like get level1StartXCoords
 			setBirdY(150); 
 		} 
 		// If we to the right of level 1 load level 0
 		// TODO this can be an if else statement since they can't both be true
-		if (getBirdY() > 400 && Lvl == 1){
-			Lvl = 0;
+		if (getBirdY() > 400 && lvl == 1){
+			lvl = 0;
 			setBirdX(590);
 			setBirdY(390);
 		} 
 		
-		if(getBirdX() == 600 && getBirdY() == 150 && Lvl == 1){
-			Lvl = 0;
+		if(getBirdX() == 600 && getBirdY() == 150 && lvl == 1){
+			lvl = 0;
 			setBirdX(60);
 			setBirdY(150);
 		}
 		
 		// If we are on level 1 and we haven't got the seeds yet
-		if(Lvl == 1 && !got_seed){
+		if(lvl == 1 && !gotSeed){
 			g2d.drawImage(seeds, 50,  50, null); 
 			// We have gotten the seeds if the birds coordinates are the same as the seeds coordinates
 			// TODO, should be getBirdX() == getSeedX()
 			if (getBirdX()==50 && getBirdY() == 50){
-				got_seed = true;
+				gotSeed = true;
 			}
 		}
 		
@@ -182,16 +180,16 @@ public class GameEx extends JPanel {
 		// rename setTop to setColBoxTop
 		// should draw the collision boxes for debugging purposes
 		//top		
-		setTop(getBirdX(),  getBirdY() - 10, bird_img.getWidth(), 10);
+		setTop(getBirdX(),  getBirdY() - 10, birdImg.getWidth(), 10);
 		
 		//bottom
-		setBot(getBirdX(),  getBirdY()+bird_img.getHeight(), bird_img.getWidth(), 10);
+		setBot(getBirdX(),  getBirdY() + birdImg.getHeight(), birdImg.getWidth(), 10);
 		
 		//left
-		setLeft(getBirdX()-10,  getBirdY(), 10, bird_img.getHeight());
+		setLeft(getBirdX()- 10,  getBirdY(), 10, birdImg.getHeight());
 		
 		//right
-		setRight(getBirdX()+bird_img.getWidth(),  getBirdY(), 10, bird_img.getHeight());
+		setRight(getBirdX() + birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 		
 		/*g2d.draw(top);
 		g2d.draw(bot);
@@ -203,8 +201,8 @@ public class GameEx extends JPanel {
 		g2d.setPaint(woodtp); // set the color to that of the wood blocks
 		
 		// draw the wood blocks
-		for(int i=0; i < maps[0].length ; i++){
-			g2d.fill(maps[Lvl][i]);
+		for(int i=0; i < blocks[0].length ; i++){
+			g2d.fill(blocks[lvl][i]);
 		}
 
 		// draw the bounds of the game which are just inside the jframe
@@ -224,11 +222,11 @@ public class GameEx extends JPanel {
 		 spdU = 30; spdD = 10; spdR = 10; spdL = 10;
 		 
 		 // Loop through the objects in the map and see if the any of them interesect with the collision boxes
-		 for(int i = 0 ; i < maps[1].length; i++){
-			 check(maps[Lvl][i]);
+		 for(int i = 0 ; i < blocks[1].length; i++){
+			 check(blocks[lvl][i]);
 		 }
 		 
-		//I needed a separate check for the maps bounds since we are always IN the screen
+		//I needed a separate check for the blocks bounds since we are always IN the screen
 		 boundary(bounds);		
 	 }
 	
@@ -253,8 +251,8 @@ public class GameEx extends JPanel {
 	    	playJump(); 	    	// Play the jump sound!
 	    	// This is where we check to see if we're on the ground or a surface. 
 	    	// THIS IS BROKEN NOT ALLOWING YOU TO JUMP ON THE NEXT BLOCK
-	    	for(int i = 0 ; i < maps[1].length; i++){
-		    	if(bot.intersects(maps[Lvl][i])) { // if it intersects with a block
+	    	for(int i = 0 ; i < blocks[1].length; i++){
+		    	if(bot.intersects(blocks[lvl][i])) { // if it intersects with a block
 					jump = 0;
 		    	} else if (!bot.intersects(bounds)){ // if it intersects with the bottom of the map
 		    		jump = 0;
