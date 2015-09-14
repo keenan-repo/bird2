@@ -46,7 +46,7 @@ public class GameEx extends Canvas implements Runnable {
 	public static final int WIDTH = 700;
 	public static final int HEIGHT = WIDTH / 12 * 9;
 	public static final int SCALE = 1;
-	public final String TITLE = "Bird";
+	public final String TITLE = "Bird Game";
 	
 	
 	private boolean running = false;
@@ -54,7 +54,7 @@ public class GameEx extends Canvas implements Runnable {
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	
-	public JFrame frame;
+	//public JFrame frame;
 	public Rectangle screen, bird, wall, top, bot, left, right, cat;
 	public Rectangle bounds; 
 	public Rectangle[][] blocks = new Rectangle[2][5];
@@ -96,7 +96,6 @@ public class GameEx extends Canvas implements Runnable {
 		bird     = new Rectangle(xPos,  yPos, 10, 10);
 		cat      = new Rectangle(50,  410, 10, 10);
 		bounds   = new Rectangle(50, 50, 600, 400);
-		frame    = new JFrame("Bird Game");
 		gotSeed  = false;
 		
 		// IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
@@ -148,110 +147,12 @@ public class GameEx extends Canvas implements Runnable {
 		right = new Rectangle(getBirdX() + birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 	}
 	
-	public void menu(){
+
+
+
+    public void menu(){
 	}
-	/*public void paint(Graphics g){
-		Graphics2D g2d = (Graphics2D)g;
-		//bounds = g.getClipBounds();
 
-		g2d.clearRect(screen.x,  screen.y,  screen.width, screen.height); // Clear the screen
-		//g2d.fill(box);
-		
-		// Bird is 50 wide by 48 height
-		// this turns the bird. It's kinda broken right now and he spins everytime.
-		// can't figure out how to fix it. Ideas?
-		
-		// Change the direction the bird is facing, not entirely working
-		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-
-		if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
-			tx.translate(- birdImg.getWidth(null), 0);
-			AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-			birdImg = op.filter(birdImg, null); 
-			swap = false;
-	    } 
-		
-		g2d.drawImage(birdImg, getBirdX(), getBirdY(), null); // Draw the bird
-		g2d.drawImage(catImg, getCatX(), getCatY(), null);    // Draw the cat
-
-		//enable this to see the birds coordinates
-		//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " lvl= " + lvl);
-		
-		// It would be better if we could "scroll" so the level is continuously loading.
-		// We could do this by setting the coordinates of some of the blocks to have negative x
-		// coordinates. And then move all of the blocks left and right instead of moving the bird left and right		
-		
-		// If the bird is on the block at the left edge of the screen and the level is equal to 0. 
-		// we want to transition to level 1. So set the bird to the right side of the screen and load level 1	
-		if (getBirdX() == 50 && getBirdY() == 150 && lvl == 0){
-			lvl=1;
-			setBirdX(590); // this should be a variable like get level1StartXCoords
-			setBirdY(150); 
-		} 
-		// If we to the right of level 1 load level 0
-		// TODO this can be an if else statement since they can't both be true
-		if (getBirdY() > 400 && lvl == 1){
-			lvl = 0;
-			setBirdX(590);
-			setBirdY(390);
-		} 
-		
-		if(getBirdX() == 600 && getBirdY() == 150 && lvl == 1){
-			lvl = 0;
-			setBirdX(60);
-			setBirdY(150);
-		}
-		
-		// If we are on level 1 and we haven't got the seeds yet
-		if(lvl == 1 && !gotSeed){
-			g2d.drawImage(seeds, 50,  50, null); 
-			// We have gotten the seeds if the birds coordinates are the same as the seeds coordinates
-			// TODO, should be getBirdX() == getSeedX()
-			if (getBirdX()==50 && getBirdY() == 50){
-				gotSeed = true;
-			}
-		}
-		
-		// setting the coordinates of the collision boxes
-		// TODO this doesn't need to be inside the paint statement 
-		// rename setTop to setColBoxTop
-		// should draw the collision boxes for debugging purposes
-		//top		
-		setTop(getBirdX(),  getBirdY() - 10, birdImg.getWidth(), 10);
-		
-		//bottom
-		setBot(getBirdX(),  getBirdY() + birdImg.getHeight(), birdImg.getWidth(), 10);
-		
-		//left
-		setLeft(getBirdX()- 10,  getBirdY(), 10, birdImg.getHeight());
-		
-		//right
-		setRight(getBirdX() + birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
-		
-		/*g2d.draw(top);
-		g2d.draw(bot);
-		g2d.draw(left);
-		g2d.draw(right);
-		
-		// TODO, this variable doesn't need to be created every time, should just be made once
-		TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
-		g2d.setPaint(woodtp); // set the color to that of the wood blocks
-		
-		// draw the wood blocks
-		for(int i=0; i < blocks[0].length ; i++){
-			g2d.fill(blocks[lvl][i]);
-		}
-
-		// draw the bounds of the game which are just inside the jframe
-		g2d.draw(bounds);
-		
-		// Should only print this if the coordinates change so we don't have to 
-		// see it every frame
-		System.out.println("x = " + getBirdX() + " y = " + getBirdY()); // Debug statement
-
-    // TODO this indent isn't correct :(
-	// Check if the bird will collide with anything by seeing if the collision boxes interesect with 
-	// the boxes or the border. If they are make the speed in the direction of the collision 0
 	void look() {
 
 		 // The default amount of pixels movement in the specified directions
@@ -284,7 +185,7 @@ public class GameEx extends Canvas implements Runnable {
 		// If the up direction key is used
 	    if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){	    	
 
-	    	playJump(); 	    	// Play the jump sound!
+	    	//playJump(); 	    	// Play the jump sound!
 	    	// This is where we check to see if we're on the ground or a surface. 
 	    	// THIS IS BROKEN NOT ALLOWING YOU TO JUMP ON THE NEXT BLOCK
 	    	for(int i = 0 ; i < blocks[1].length; i++){
@@ -404,7 +305,7 @@ public class GameEx extends Canvas implements Runnable {
 
 			//g2d.clearRect(screen.x,  screen.y,  screen.width, screen.height);
 			//g2d.fill(box);
-			/*
+			
 			//bird is 50 wide by 48 height
 			//this turns the bird. It's kinda broken right now and he spins everytime.
 			//can't figure out how to fix it. Ideas?
@@ -417,33 +318,33 @@ public class GameEx extends Canvas implements Runnable {
 				swap=false;
 		    } 
 			
-			//draw the bird*/
+			//draw the bird
 			g.drawImage(birdImg, getBirdX(),  getBirdY(), null);
 			
-			g.drawImage(cat_img, getCatX(),  getCatY(), null);
+			g.drawImage(catImg, getCatX(),  getCatY(), null);
 
 			//enable this to see the birds coordinates
-			//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " Lvl= " + Lvl);
+			//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " lvl= " + lvl);
 			
-			if (getBirdX()==50 && getBirdY()==150 && Lvl==0){
-				Lvl=1;
+			if (getBirdX()==50 && getBirdY()==150 && lvl==0){
+				lvl=1;
 				setBirdX(590);
 				setBirdY(150);
 			} 
-			if (getBirdY()>400 && Lvl==1){
-				Lvl=0;
+			if (getBirdY()>400 && lvl==1){
+				lvl=0;
 				setBirdX(590);
 				setBirdY(390);
 			} 
-			if(getBirdX()==600 && getBirdY()==150 && Lvl==1){
-				Lvl=0;
+			if(getBirdX()==600 && getBirdY()==150 && lvl==1){
+				lvl=0;
 				setBirdX(60);
 				setBirdY(150);
 			} 
-			if(Lvl == 1 && !got_seed){
+			if(lvl == 1 && !gotSeed){
 				g.drawImage(seeds, 50,  50, null);
 				if (getBirdX()==50 && getBirdY() == 50){
-					got_seed = true;
+					gotSeed = true;
 				}
 			}
 			
@@ -468,8 +369,8 @@ public class GameEx extends Canvas implements Runnable {
 			TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
 			((Graphics2D) g).setPaint(woodtp);
 			
-			for(int i=0; i < maps[0].length ; i++){
-				((Graphics2D) g).fill(maps[Lvl][i]);
+			for(int i=0; i < blocks[0].length ; i++){
+				((Graphics2D) g).fill(blocks[lvl][i]);
 			}
 
 			((Graphics2D) g).draw(bounds);
@@ -486,9 +387,8 @@ public class GameEx extends Canvas implements Runnable {
 	private void tick() {
         look();
         processInput();
-        frame.repaint();
-		 	}		 
-	}
+		 	}
+
 
 
 
@@ -533,11 +433,11 @@ public class GameEx extends Canvas implements Runnable {
 	}
 	
 	/* Start getters and setters */
-	int getBirdY(){return this.bird.y;}
-	void setBirdY(int birdY){this.bird.y = birdY;}
+	private int getBirdY(){return this.bird.y;}
+	private void setBirdY(int birdY){this.bird.y = birdY;}
 	
-	int getBirdX(){return this.bird.x;}
-    void setBirdX(int birdX){this.bird.x = birdX;}
+ 	private int getBirdX(){return this.bird.x;}
+    private void setBirdX(int birdX){this.bird.x = birdX;}
     
 	int getCatY(){return this.cat.y;}
 	void setCatY(int catY){this.cat.y = catY;}
@@ -644,7 +544,4 @@ public class GameEx extends Canvas implements Runnable {
 	        e.printStackTrace();
 	     }		
 	}
-
-
-
 }
