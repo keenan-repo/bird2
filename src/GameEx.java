@@ -1,23 +1,25 @@
 import java.awt.Graphics2D;
-
-import javax.sound.sampled.*;
-
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.TexturePaint;
 import java.awt.event.KeyEvent;
-import java.util.*;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.io.File;
+import java.io.IOException;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 
-import java.io.*; // TODO, shouldn't import everything like this, only what is needed
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
