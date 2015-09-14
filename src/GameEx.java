@@ -157,7 +157,7 @@ public class GameEx extends Canvas implements Runnable {
        //this turns the bird. It's kinda broken right now and he spins everytime.
        //can't figure out how to fix it. Ideas?
        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-       
+
        if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
            tx.translate(-birdImg.getWidth(null), 0);
            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
