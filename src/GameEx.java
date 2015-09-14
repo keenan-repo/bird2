@@ -9,8 +9,9 @@ import java.awt.event.KeyEvent;
 import java.util.*;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
+import java.awt.Dimension;
+import java.awt.Canvas;
 import java.io.File;
-//import java.awt.geom.Line2D;
 
 
 
@@ -19,20 +20,29 @@ import javax.imageio.ImageIO;
 
 import java.io.*;
 import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 
-//import javax.swing.WindowConstants;
 
-import java.awt.*;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
 @SuppressWarnings("serial")
-public class GameEx extends JPanel {
+public class GameEx extends Canvas implements Runnable {
 	
-	public VGTimerTask vgTask;
+	public static final int WIDTH = 700;
+	public static final int HEIGHT = WIDTH / 12 * 9;
+	public static final int SCALE = 1;
+	public final String TITLE = "Bird";
+	
+	
+	private boolean running = false;
+	private Thread thread;
+	
+	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+	
 	public JFrame frame;
 	public Rectangle screen, bird, wall, top, bot, left, right, cat ;
 	public Rectangle bounds ; 
@@ -40,14 +50,36 @@ public class GameEx extends JPanel {
 	public int x_pos=550 , y_pos=100, spdU, spdD, spdR, spdL, Lvl=0, jump=5;
 	public boolean[] keys = new boolean[256];
 	public boolean keyL, keyR, keyU, keyD, swap, got_seed ;
-	BufferedImage bird_img, seeds, wood, cat_img;
+	BufferedImage birdImg, seeds, wood, cat_img;
+	
+	private synchronized void start(){
+		if(running)
+			return;
+		
+		running = true;
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	private synchronized void stop(){
+		if(!running)
+			return;
+		
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}		
+		System.exit(1);
+	}
 
 	public GameEx()  {
 		
 		KeyListener listener = new MyKeyListener();
 		addKeyListener(listener);
 		setFocusable(true);
-		screen   = new Rectangle(0, 0, 700, 500);
+		//screen   = new Rectangle(0, 0, 700, 500);
 		bird     = new Rectangle(x_pos,  y_pos, 10, 10);
 		cat      = new Rectangle(50,  410, 10, 10);
 		bounds   = new Rectangle(50, 50, 600, 400);
@@ -70,18 +102,17 @@ public class GameEx extends JPanel {
 		maps[1][3]=new Rectangle(270,170,50,50);
 		maps[1][4]=new Rectangle(0,0,0,0);
 
-		vgTask = new VGTimerTask();	
 			    
 	    // Start the music and load the sprites
 	    try {
 	    	// TODO the convention in java for variables is lower camel case
 	    	// i.e. birdImg
-	    	bird_img = ImageIO.read(new File("sprite.png")); // Main character
+	    	birdImg = ImageIO.read(new File("sprite.png")); // Main character
 	    	seeds    = ImageIO.read(new File("seeds.png"));  // Have to get these to beat the level
 	    	wood     = ImageIO.read(new File("wood.png"));   // The image for the blocks
 	    	cat_img  = ImageIO.read(new File("cat.png"));    // Bad guyi
 	        // Open an audio input stream.
-	    	File soundFile = new File("little.wav");
+	    	File soundFile = new File("Shy-Animal2.wav");
 	    	AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
 	        // Get a sound clip resource.
 	        Clip clip = AudioSystem.getClip();
@@ -97,16 +128,17 @@ public class GameEx extends JPanel {
 	     }
 	    
 	    //hit box. This should be turned into an array as well
-		top= new Rectangle(getBirdX(),  getBirdY()-10, bird_img.getWidth(), 10);
-		bot= new Rectangle(getBirdX(),  getBirdY()+bird_img.getHeight(), bird_img.getWidth(), 10);
-		left= new Rectangle(getBirdX()-10,  getBirdY(), 10, bird_img.getHeight());
-		right= new Rectangle(getBirdX()+bird_img.getWidth(),  getBirdY(), 10, bird_img.getHeight());
+		top   = new Rectangle(getBirdX(),  getBirdY()-10, birdImg.getWidth(), 10);
+		bot   = new Rectangle(getBirdX(),  getBirdY()+birdImg.getHeight(), birdImg.getWidth(), 10);
+		left  = new Rectangle(getBirdX()-10,  getBirdY(), 10, birdImg.getHeight());
+		right = new Rectangle(getBirdX()+birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 	}
 	
 
-
-	public void paint(Graphics g){
-		super.paintComponent(g);
+	public void menu(){
+		
+	}
+	/*public void paint(Graphics g){
 		Graphics2D g2d = (Graphics2D)g;
 		//bounds = g.getClipBounds();
 
@@ -119,14 +151,14 @@ public class GameEx extends JPanel {
 		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
 
 		if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
-			tx.translate(-bird_img.getWidth(null), 0);
+			tx.translate(-birdImg.getWidth(null), 0);
 			AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-			bird_img = op.filter(bird_img, null);
+			birdImg = op.filter(birdImg, null);
 			swap=false;
 	    } 
 		
 		//draw the bird
-		g2d.drawImage(bird_img, getBirdX(),  getBirdY(), null);
+		g2d.drawImage(birdImg, getBirdX(),  getBirdY(), null);
 		g2d.drawImage(cat_img, getCatX(),  getCatY(), null);
 
 		//enable this to see the birds coordinates
@@ -155,21 +187,21 @@ public class GameEx extends JPanel {
 		}
 		
 		//top		
-		setTop(getBirdX(),  getBirdY()-10, bird_img.getWidth(), 10);
+		setTop(getBirdX(),  getBirdY()-10, birdImg.getWidth(), 10);
 		
 		//bottom
-		setBot(getBirdX(),  getBirdY()+bird_img.getHeight(), bird_img.getWidth(), 10);
+		setBot(getBirdX(),  getBirdY()+birdImg.getHeight(), birdImg.getWidth(), 10);
 		
 		//left
-		setLeft(getBirdX()-10,  getBirdY(), 10, bird_img.getHeight());
+		setLeft(getBirdX()-10,  getBirdY(), 10, birdImg.getHeight());
 		
 		//right
-		setRight(getBirdX()+bird_img.getWidth(),  getBirdY(), 10, bird_img.getHeight());
+		setRight(getBirdX()+birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 		
 		/*g2d.draw(top);
 		g2d.draw(bot);
 		g2d.draw(left);
-		g2d.draw(right);*/
+		g2d.draw(right);
 		
 		//box or any other stuff
 		TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
@@ -182,10 +214,10 @@ public class GameEx extends JPanel {
 		g2d.draw(bounds);
 		
 		System.out.println("x = " + getBirdX() + " y = " + getBirdY());
-		}
+		} */
 
 	
-	 void look() {
+	void look() {
 		 //we need to initially say we're not hitting anything
 		 //then check if we are and make the spd in that direction 0
 		 spdU=30; spdD=10; spdR=10; spdL=10 ;
@@ -198,7 +230,6 @@ public class GameEx extends JPanel {
 		 boundary(bounds);		
 	 }
 
-	
 	public void processInput() {
 		//this is my way of jumping. I didn't want an instant jump so it moves a bit up each run
 		//after it hits the max, it will stop moving up until you hit up and you're touching something
@@ -266,15 +297,143 @@ public class GameEx extends JPanel {
 	//proccessInput() handles the input, move, jump etc
 	//then we repaint the frame
 	
-	 class VGTimerTask extends TimerTask{
-		 public void run() {
-			 look();
-			 processInput();
-			 frame.repaint();
-		 	}
+
+	 public void run() {
+		 long lastTime = System.nanoTime();
+		 final double amountOfTicks = 60.0;
+		 double ns = 1000000000 / amountOfTicks;
+		 double delta = 0;
+		 int updates = 0;
+		 int frames = 0;
+		 long timer = System.currentTimeMillis();
+			 while(running){
+				 long now = System.nanoTime();
+				 delta += (now - lastTime) / ns;
+				 lastTime = now;
+				 if(delta >= 1){
+					 tick();
+					 updates++;
+					 delta--;
+				 }
+				 render();
+				 frames++;
+				 
+				 if(System.currentTimeMillis() - timer > 1000){
+					 timer += 1000;
+					 System.out.println(updates + " Ticks, Fps " + frames);
+					 updates = 0;
+					 frames = 0;
+				 }
+			 }
+			 stop();
+	 	}
 		 
-	 }
+
 	
+	private void render() {
+		// TODO Auto-generated method stub
+		BufferStrategy bs = this.getBufferStrategy();
+		
+		if(bs == null) {
+			createBufferStrategy(3);
+			return;
+		}
+		
+		Graphics g = bs.getDrawGraphics();
+		////////////
+		g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+			//Graphics2D g2d = (Graphics2D)g;
+
+			//g2d.clearRect(screen.x,  screen.y,  screen.width, screen.height);
+			//g2d.fill(box);
+			/*
+			//bird is 50 wide by 48 height
+			//this turns the bird. It's kinda broken right now and he spins everytime.
+			//can't figure out how to fix it. Ideas?
+			AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+
+			if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
+				tx.translate(-birdImg.getWidth(null), 0);
+				AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+				birdImg = op.filter(birdImg, null);
+				swap=false;
+		    } 
+			
+			//draw the bird*/
+			g.drawImage(birdImg, getBirdX(),  getBirdY(), null);
+			
+			g.drawImage(cat_img, getCatX(),  getCatY(), null);
+
+			//enable this to see the birds coordinates
+			//System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " Lvl= " + Lvl);
+			
+			if (getBirdX()==50 && getBirdY()==150 && Lvl==0){
+				Lvl=1;
+				setBirdX(590);
+				setBirdY(150);
+			} 
+			if (getBirdY()>400 && Lvl==1){
+				Lvl=0;
+				setBirdX(590);
+				setBirdY(390);
+			} 
+			if(getBirdX()==600 && getBirdY()==150 && Lvl==1){
+				Lvl=0;
+				setBirdX(60);
+				setBirdY(150);
+			} 
+			if(Lvl == 1 && !got_seed){
+				g.drawImage(seeds, 50,  50, null);
+				if (getBirdX()==50 && getBirdY() == 50){
+					got_seed = true;
+				}
+			}
+			
+			//top		
+			setTop(getBirdX(),  getBirdY()-10, birdImg.getWidth(), 10);
+			
+			//bottom
+			setBot(getBirdX(),  getBirdY()+birdImg.getHeight(), birdImg.getWidth(), 10);
+			
+			//left
+			setLeft(getBirdX()-10,  getBirdY(), 10, birdImg.getHeight());
+			
+			//right
+			setRight(getBirdX()+birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
+			
+			/*g2d.draw(top);
+			g2d.draw(bot);
+			g2d.draw(left);
+			g2d.draw(right);*/
+			
+			//box or any other stuff
+			TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
+			((Graphics2D) g).setPaint(woodtp);
+			
+			for(int i=0; i < maps[0].length ; i++){
+				((Graphics2D) g).fill(maps[Lvl][i]);
+			}
+
+			((Graphics2D) g).draw(bounds);
+			
+			//System.out.println("x = " + getBirdX() + " y = " + getBirdY()); 
+			
+		
+		///////////
+
+		g.dispose();
+		bs.show();
+	}
+
+	private void tick() {
+        look();
+        processInput();
+        frame.repaint();
+		
+	}
+
+
+
 	public class MyKeyListener implements KeyListener {
 
 		public void keyPressed(KeyEvent e) {
@@ -289,32 +448,26 @@ public class GameEx extends JPanel {
 		public void keyTyped(KeyEvent e) {
 		}	
 	}
-	public void update(LineEvent le) {
-	    LineEvent.Type type = le.getType();
-	    if (type == LineEvent.Type.OPEN) {
-	      System.out.println("OPEN");
-	    } else if (type == LineEvent.Type.CLOSE) {
-	      System.out.println("CLOSE");
-	      System.exit(0);
-	    } 
-	  }
-	
+
 
 	public static void main(String[] args) {
-		java.util.Timer vgTimer = new java.util.Timer();
-		GameEx panel = new GameEx();
-
-	
-		//Set up the frame
-	    panel.frame.setSize(panel.screen.width, panel.screen.height);
-        panel.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-
-	    panel.frame.setContentPane(panel);     
-
-        panel.frame.setVisible(true); 
+		GameEx game = new GameEx();
 		
-		vgTimer.schedule(panel.vgTask, 0, 30);
+		game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+		game.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+		game.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+
+		JFrame frame = new JFrame(game.TITLE);
+		frame.add(game);
+		frame.pack();
+		
+		//Set up the frame
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+		frame.setResizable(false);
+		frame.setLocationRelativeTo(null);
+        frame.setVisible(true); 
+		
+        game.start();
 		
 	}
 	
@@ -436,5 +589,8 @@ public class GameEx extends JPanel {
 	     }
 		
 	}
+
+
+
 
 }
