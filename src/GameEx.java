@@ -52,6 +52,7 @@ public class GameEx extends Canvas implements Runnable {
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private BufferedImage spriteSheet = null; //this will be used for the sprite sheet when we get one
+	private BufferedImage player;
 	//private BufferedImage bird; //this is used in the sprite sheet stuff
 	
 
@@ -72,14 +73,17 @@ public class GameEx extends Canvas implements Runnable {
 	private Player p;
 	
 	public void init(){
-	   /* BufferedImageLoader loader = new BufferedImageLoader();
+	    BufferedImageLoader loader = new BufferedImageLoader();
 	    try{	        
 	        spriteSheet = loader.loadImage("/sprite_sheet.png");	        
 	    }catch(IOException e){
 	        e.printStackTrace();
 	    }
 	    
-        p = new Player (200, 200, this); */
+	    addKeyListener(new KeyInput(this));
+	    
+	    p = new Player(500, 300, this);
+
 	}
 	
 	// I barely understand how the next bit works until after run() so don't worry
@@ -138,22 +142,19 @@ public class GameEx extends Canvas implements Runnable {
         
 
    private void tick() {
+       look();
+       p.tick();
        // TODO create the level tracker and put it here. This will start out by switching levels when the bird is in the 
        // right spot. Later it will maybe handle moving the screen along with the bird.
-       //p.tick();
-       look();
        processInput();
            }
 
 	private GameEx()  {
-		
-		KeyListener listener = new MyKeyListener();
-		addKeyListener(listener);
+
 		setFocusable(true);
 
-		bird     = new Rectangle(xPos,  yPos, 10, 10);
 		cat      = new Rectangle(50,  410, 10, 10);
-		bounds   = new Rectangle(50, 50, 600, 400);
+		bounds   = new Rectangle(64, 64, WIDTH-128, HEIGHT-128);
 		gotSeed  = false;
 		
 		// IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
@@ -180,19 +181,20 @@ public class GameEx extends Canvas implements Runnable {
 			    
 	    // Start the music and load the sprites
 	    try {
-	    	birdImg = ImageIO.read(new File("bird.png"));  // Main character bird image
+	    	//birdImg = ImageIO.read(new File("bird.png"));  // Main character bird image dont need this anymore
 	    	seeds   = ImageIO.read(new File("seeds.png")); // Seeds  image
 	    	wood    = ImageIO.read(new File("wood.png"));  // Blocks image
 	    	catImg  = ImageIO.read(new File("cat.png"));   // Bad guy cat image
 	    	
 	        // Open an audio input stream.
-	    	File soundFile = new File("Shy-Animal2.wav");
+	    	File soundFile = new File("8bit.wav");
 	    	AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
 	        // Get a sound clip resource.
 	        Clip clip = AudioSystem.getClip();
 	        // Open audio clip and load samples from the audio input stream.
 	        clip.open(audioIn);
-	        //clip.loop(Clip.LOOP_CONTINUOUSLY); Turning this off for now because my ears
+	        clip.start();
+	        //clip.loop(Clip.LOOP_CONTINUOUSLY);// Turning this off for now because my ears
 	     } catch (UnsupportedAudioFileException e) {
 	        e.printStackTrace();
 	     } catch (IOException e) {
@@ -201,11 +203,6 @@ public class GameEx extends Canvas implements Runnable {
 	        e.printStackTrace();
 	     }
 	    
-	    // Hit box. This should be turned into an array as well
-		top   = new Rectangle(getBirdX(), getBirdY() - 10, birdImg.getWidth(), 10);
-		bot   = new Rectangle(getBirdX(), getBirdY() + birdImg.getHeight(), birdImg.getWidth(), 10);
-		left  = new Rectangle(getBirdX() - 10,  getBirdY(), 10, birdImg.getHeight());
-		right = new Rectangle(getBirdX() + birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
 	}
 	
 	   private void render() {
@@ -218,72 +215,55 @@ public class GameEx extends Canvas implements Runnable {
 	       }
 	       
 	       Graphics g = bs.getDrawGraphics();
-	       //p.render(g);
+
 	       //draws the black screen
 	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+
 	       Graphics2D g2d = (Graphics2D)g;
 	       
 	       
 	       // bird is 50 wide by 48 height
 	       // this turns the bird. It's kinda broken right now and he spins everytime.
 	       // can't figure out how to fix it. Ideas?
-	       AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+	      /* AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
 	       
 	       if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
 	           tx.translate(-birdImg.getWidth(null), 0);
 	           AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 	           birdImg = op.filter(birdImg, null);
 	           swap=false;
-	       } 
+	       } */
 	       
-	       //draw the bird
-	       g.drawImage(birdImg, getBirdX(),  getBirdY(), null);
+	       //draw the player
+           p.render(g);
 	       
-	       //draw cat
-	       g.drawImage(catImg, getCatX(),  getCatY(), null);
 	       
-	       // enable this to see the birds coordinates
-	       //System.out.println("X= " + getBirdX() + " Y= " + getBirdY() + " lvl= " + lvl);
-	       
-	       // The level stuff needs to be contained it its own method incase it gets big
-	       if (getBirdX()==50 && getBirdY()==150 && lvl==0){
+	       // The level stuff needs to be contained it its own method incase it gets big.  its bugged
+	       if (p.getX()<60 && p.getY()>164 && lvl==0){
 	           lvl=1;
-	           setBirdX(590);
-	           setBirdY(150);
+	           p.setX(590);
+	           p.setY(150);
 	       } 
-	       if (getBirdY()>400 && lvl==1){
+	       if (p.getY()>400 && lvl==1){
 	           lvl=0;
-	           setBirdX(590);
-	           setBirdY(390);
+	           p.setX(590);
+	           p.setY(390);
 	       } 
-	       if(getBirdX()==600 && getBirdY()==150 && lvl==1){
+	       if(p.getX()==614 && p.getY()==166 && lvl==1){
 	           lvl=0;
-	           setBirdX(60);
-	           setBirdY(150);
+	           p.setX(70);
+	           p.setY(164);
 	       } 
 	       if(lvl == 1 && !gotSeed){
 	           g.drawImage(seeds, 50,  50, null);
-	           if (getBirdX()==50 && getBirdY() == 50){
+	           if (getX()==50 && getY() == 50){
 	               gotSeed = true;
 	           }
-	       }
+	       } 
 	       
-	       //top       
-	       setTop(getBirdX(),  getBirdY()-10, birdImg.getWidth(), 10);
+	       System.out.println("x = " + p.getX() + " y = " + p.getY());
 	       
-	       //bottom
-	       setBot(getBirdX(),  getBirdY()+birdImg.getHeight(), birdImg.getWidth(), 10);
 	       
-	       //left
-	       setLeft(getBirdX()-10,  getBirdY(), 10, birdImg.getHeight());
-	       
-	       //right
-	       setRight(getBirdX()+birdImg.getWidth(),  getBirdY(), 10, birdImg.getHeight());
-	       
-	       /*g2d.draw(top);
-	       g2d.draw(bot);
-	       g2d.draw(left);
-	       g2d.draw(right);*/
 	       
 	       // Apply textures and draw the blocks
 	       TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
@@ -304,7 +284,7 @@ public class GameEx extends Canvas implements Runnable {
 	void look() {
 
 		 // The default amount of pixels movement in the specified directions
-		 spdU = 30; spdD = 10; spdR = 10; spdL = 10;
+		 spdU = 32; spdD = 8; spdR = 8; spdL = 8;
 		 
 		 // Loop through the objects in the map and see if the any of them interesect with the collision boxes
 		 for(int i = 0 ; i < blocks[1].length; i++){
@@ -320,58 +300,60 @@ public class GameEx extends Canvas implements Runnable {
 		// instead of moving up in 1 frame
 		// it will stop moving up until you hit up and you're touching something ( TODO this comment doesn't make sense)
 		// TODO Can just check if it's less than the jump (jump < 5)
+	   //System.out.println(p.getY() + " spdU " + spdU);
 		if(jump <= 4){ // TODO can jump be a local variable?
 			// subtract the speed up because the origin is at the top left corner so
 			// when the bird jumps he is technically moving down
-			setBirdY(getBirdY() - spdU); 
+		    p.setVelY(-spdU);
 			jump++;
+		} else if (jump > 4) {
+		    p.setVelY(spdD);
 		}
 		
 		// If the w key or the up key is pressed, jump
 		// If the up direction key is used
-	    if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){	    	
-
+	    if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){	  
 	    	playJump(); 	    	// Play the jump sound!
 	    	// This is where we check to see if we're on the ground or a surface. 
 	    	for(int i = 0 ; i < blocks[1].length; i++){
-		    	if(bot.intersects(blocks[lvl][i])) { // if it intersects with a block
+		    	if(p.getB().intersects(blocks[lvl][i])) { // if it intersects with a block
 					jump = 0;
-		    	} else if (!bot.intersects(bounds)){ // if it intersects with the bottom of the map
+		    	} else if (!p.getB().intersects(bounds)){ // if it intersects with the bottom of the map
 		    		jump = 0;
-                      
+		            
 		    	}
+
 	    	}	
 	    	keys[KeyEvent.VK_UP]=false; keys[KeyEvent.VK_W]=false;
+
 		}
-	    
-	    
 	    
 	    // We will only need this if the bird is going into a hole or some other reason to go down
 	    if(keys[KeyEvent.VK_S] || keys[KeyEvent.VK_DOWN]){
-	        setBirdY(getBirdY() + spdD);
+	        p.setVelY(spdD);
 	    } 
 
 	    // If the left direction key is used
 	    if(keys[KeyEvent.VK_A] || keys[KeyEvent.VK_LEFT]){
-	        setBirdX(getBirdX() - spdL);	    	
+	        p.setVelX(-spdL);
 	    }
 	    
 
 	    // If the right direction key is used
 	    if(keys[KeyEvent.VK_D] || keys[KeyEvent.VK_RIGHT]){
-	        setBirdX(getBirdX() + spdR);
+	        p.setVelX(spdR);
+
 	    } 
 	    // Always set the birds speed to be downwards
 	    // This acts as gravity
-	    setBirdY(getBirdY() + spdD);	    
+	   // p.setVelY(spdD);
 	}
 	
 	private void processEnemy(){
 		// TODO make the cat walk around and if it intersects with the collision boxes
 		// reset the position of the bird to the start of the level
 		// I think the level could be a class and it could have a starting position that we
-		// can set and call
-		
+		// can set and call	
 		if (getCatX() < 60){
 			setCatX(getCatX() + 10);
 		} else if (getCatX() > 200) {
@@ -379,26 +361,25 @@ public class GameEx extends Canvas implements Runnable {
 		}
 	}
 		
-	private class MyKeyListener implements KeyListener {
-
-		public void keyPressed(KeyEvent e) {
-		    keys[e.getKeyCode()] = true;
-	        System.out.println("Left");
-		}
-
-		public void keyReleased(KeyEvent e) {
-		    keys[e.getKeyCode()] = false;
-//		    swap=true; // I think this is why the bird changes direction when you don't want to
-		    // TODO What we need to do is if the left key is pressed
-		    // set some boolean isChangeDirection(true) 
-		    // then if if that's true and the right key is clicked, trigger the affine transform
-		    // and set the variable to false
-		    // then vice versa for going left
-		}
-
-		public void keyTyped(KeyEvent e) {
-		}	
+	public void keyPressed(KeyEvent e) {
+	    keys[e.getKeyCode()] = true;
 	}
+
+	public void keyReleased(KeyEvent e) {
+	    keys[e.getKeyCode()] = false;
+	    p.setVelX(0);
+	    //p.setVelY(0);
+//		    swap=true; // I think this is why the bird changes direction when you don't want to
+	    // TODO What we need to do is if the left key is pressed
+	    // set some boolean isChangeDirection(true) 
+	    // then if if that's true and the right key is clicked, trigger the affine transform
+	    // and set the variable to false
+	    // then vice versa for going left
+	}
+
+	public void keyTyped(KeyEvent e) {
+	}	
+	
 
 
 	public static void main(String[] args) {
@@ -419,73 +400,41 @@ public class GameEx extends Canvas implements Runnable {
 	}
 	
 	/* Start getters and setters */
-	private int getBirdY(){return this.bird.y;}
-	private void setBirdY(int birdY){this.bird.y = birdY;}
-	
- 	private int getBirdX(){return this.bird.x;}
-    private void setBirdX(int birdX){this.bird.x = birdX;}
-    
+  
 	int getCatY(){return this.cat.y;}
 	void setCatY(int catY){this.cat.y = catY;}
 	
 	int getCatX(){return this.cat.x;}
     void setCatX(int catX){this.cat.x = catX;}
     
-    // The collision boxes could be there own class but eh
-    void setTop(int x, int y, int w, int h){
-    	this.top.x = x;
-    	this.top.y = y;
-    	this.top.width = w;
-    	this.top.height = h;
-    	}
-    void setBot(int x, int y, int w, int h){
-    	this.bot.x = x;
-    	this.bot.y = y;
-    	this.bot.width = w;
-    	this.bot.height = h;
-    	}
-    void setRight(int x, int y, int w, int h){
-    	this.right.x = x;
-    	this.right.y = y;
-    	this.right.width = w;
-    	this.right.height = h;
-    	}
-    void setLeft(int x, int y, int w, int h){
-    	this.left.x = x;
-    	this.left.y = y;
-    	this.left.width = w;
-    	this.left.height = h;
-    	}
     
-    // TODO doesn't need to be a function since we only call it once
+    // TODO doesn't need to be a function since we only call it once. Or should turn spds into array and rectangles too.
     // rename to checkCollision
     // check if the collision boxes intersects with any objects on the map
-	 void check(Rectangle r) {
-		 //spdU=10; spdD=10; spdR=10; spdL=10 ;
-			if (top.intersects(r)) {
-				spdU=0;
-			}  if(bot.intersects(r)) {
-				spdD=0;
-			}  if(right.intersects(r)) {
-				spdR=0;			
-			}  if(left.intersects(r)) {
-				spdL=0;
-			}
+	 void check(Rectangle r) {			
+         if (p.getT().intersects(r)) {
+                spdU=0;
+            }  if(p.getB().intersects(r)) {
+                spdD=0;
+            }  if(p.getR().intersects(r)) {
+                spdR=0;         
+            }  if(p.getL().intersects(r)) {
+                spdL=0;
+            }
 		 
 	 }
 	 // check if the collision boxes intersect with the boundaries of the map
 	 // rename to boundaryCollision
-	 void boundary(Rectangle r) {
-		 //spdU=10; spdD=10; spdR=10; spdL=10 ;
-			if (!top.intersects(r)) {
-				spdU=0;
-			}  if(!bot.intersects(r)) {
-				spdD=0;
-			}  if(!right.intersects(r)) {
-				spdR=0;			
-			}  if(!left.intersects(r)) {
-				spdL=0;
-			}		 
+	 void boundary(Rectangle r) {		
+         if (!p.getT().intersects(r)) {
+                spdU=0;
+            }  if(!p.getB().intersects(r)) {
+                spdD=0;
+            }  if(!p.getR().intersects(r)) {
+                spdR=0;         
+            }  if(!p.getL().intersects(r)) {
+                spdL=0;
+            }
 	 }
 
 	 // TODO This function is only called once again so it doesn't need to be a function
