@@ -28,7 +28,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
-// TODO, rename variables
+// TODO, rename variables still needs to be done
 // put in getters and setters
 // TODO change all private shit to private
 
@@ -73,16 +73,23 @@ public class GameEx extends Canvas implements Runnable {
 	private Player p;
 	
 	public void init(){
+	    
 	    // Here I create a bunch of blocks and put them at semi random heights just to jump on.
-	    
-	    
+	    // This is where the level needs to be built. 
+	    // another class for this would be nice. Not sure how we would do that though. 
 	    for (int i = 1; i < 100; i++){
 	        double r = Math.random()*50;
 	        System.out.println(r);
-	        squares[i]=new Rectangle(100*i, (int)(600+r), 25, 25 ); 
+	        squares[i]=new Rectangle(100*i, (int)(600+r), 0, 0 ); 
 	    }
 
-	    squares[0]=new Rectangle(0, 600, 500, 25);
+	    squares[0]=new Rectangle(0, 600, 500, 25); // lower
+	    squares[1]=new Rectangle(620, 530, 500, 25); //top
+	    squares[3]=new Rectangle(620, 700, 700, 75); // lowest
+	    
+	    
+	    // This is a better img loader, i think everything should be loaded. It only loads the file once.
+	    //TODO load other images here, textures, sprites. Longterm todo those should go in the sprite sheet
 	    BufferedImageLoader loader = new BufferedImageLoader();
 	    try{	        
 	        spriteSheet = loader.loadImage("/sprite_sheet.png");
@@ -93,13 +100,14 @@ public class GameEx extends Canvas implements Runnable {
 	    
 	    addKeyListener(new KeyInput(this));
 	    
+	    
+	    // Sets up the background to be loaded
         BackGround bg = new BackGround(getBackGround());
         back = bg.grabImage(0, 0, 1500, 1500);
 	    p = new Player(500, 300, this);
 
 	}
 	
-
 
     // I barely understand how the next bit works until after run() so don't worry
 	private synchronized void start(){
@@ -165,7 +173,8 @@ public class GameEx extends Canvas implements Runnable {
            }
 
 	private GameEx()  {
-
+	    // I don't think this is really needed anymore. Everything done in here is done in init()
+	    // Something to look into
 		setFocusable(true);
 
 		cat      = new Rectangle(50,  410, 10, 10);
@@ -245,15 +254,12 @@ public class GameEx extends Canvas implements Runnable {
                screeny=975;
 	       
 	       
-
-
            Graphics2D g2d = (Graphics2D)g;
            //draw the background
-	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+	       //g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 	       g.drawImage(back, -screenx, -screeny, 1500, 1500, this);
 
-
-	       
+    
 	       
 	       // bird is 50 wide by 48 height
 	       // this turns the bird. It's kinda broken right now and he spins everytime.
@@ -282,6 +288,11 @@ public class GameEx extends Canvas implements Runnable {
 	       //System.out.println(screenx + " y = " + screeny);
 	       
 	       // This loop looks at all the blocks on the level and makes an array of the ones that would be in the screen
+	       // it tests the blocks to see if they intersect with where the screen is
+	       // if they do, it will adjust the blocks coordinates relative to the screen and store it in a new array
+	       // This is more efficient, since now we have an array of only a few elements to loop over rather than the whole map
+	       // when we are drawing
+	
            lenIn=0;                   
            for(int i=0; i < 100 ; i++){
                Rectangle test = new Rectangle(squares[i].x - screenx, squares[i].y -screeny, squares[i].width, squares[i].height);
@@ -319,14 +330,26 @@ public class GameEx extends Canvas implements Runnable {
 		 
 		// I needed a separate check for the blocks bounds since we are always IN the screen
 		 boundary(bounds);		
+		 
+		 // this is a shitty way to move the screen as you fall
+		 // the collision detection needs work, all the movement in general does
+		 // TODO fix collision detection, make it smoother
+		 if (!p.getB().intersects(bounds)){
+		     screeny += 5; 
+		 }
 	 }
 	
 	private void processInput() {
+	    
+	    // TODO This class needs to be cleaned up as well. We need to decide the range of motions we want for the bird
+	    // this will also change as we fix the collision detection
+	    // I was just adding things to make it work for now
+	    
+	    // TODO Make the screen scroll smooth. It should have an acceleration and deacceleration to it
+	    
 		// If the up key is pressed move the bird up for 4 iterations. This is done to make the movement smooth
 		// instead of moving up in 1 frame
 		// it will stop moving up until you hit up and you're touching something ( TODO this comment doesn't make sense)
-		// TODO Can just check if it's less than the jump (jump < 5)
-	   //System.out.println(p.getY() + " spdU " + spdU);
 		if(jump <= 4){ // TODO can jump be a local variable?
 			// subtract the speed up because the origin is at the top left corner so
 			// when the bird jumps he is technically moving down
@@ -335,27 +358,21 @@ public class GameEx extends Canvas implements Runnable {
 		} else if (jump > 4) {
 		    p.setVelY(spdD);
 		}
-		
+	
 		// If the w key or the up key is pressed, jump
 		// If the up direction key is used
 	    if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){	  
 	    	//playJump(); 	    	// Play the jump sound!
 	    	// This is where we check to see if we're on the ground or a surface. 
-
-	        
 	        for(int i = 0 ; i < lenIn; i++){
                 if(p.getB().intersects(squaresIn[i])) { // if it intersects with a block
                     jump = 0;
-                    System.out.println("jump!");
+                    System.out.println("up");
                 } else if (!p.getB().intersects(bounds)){ // if it intersects with the bottom of the map
-                    jump = 0;
-                    
+                    jump = 0;                   
                 }
+            }     
 
-            }   
-	        
-	        
-	          //screeny -= 3;
 	    	keys[KeyEvent.VK_UP]=false; keys[KeyEvent.VK_W]=false;
 
 		}
@@ -388,8 +405,15 @@ public class GameEx extends Canvas implements Runnable {
 
 	     
 	    // Always set the birds speed to be downwards
-	    // This acts as gravity
-	   // p.setVelY(spdD);
+	    // TODO add a proper gravity. Maybe a floor or a check if they fall off a cliff
+	    
+        /*for(int i = 0 ; i < lenIn; i++){
+            if(!p.getB().intersects(squaresIn[i])) { // if it intersects with a block
+                p.setVelY(spdD);
+            } else if (p.getB().intersects(bounds)){ // if it intersects with the bottom of the map
+                spdD=0;                   
+            }
+        } */
 	}
 	
 	private void processEnemy(){
