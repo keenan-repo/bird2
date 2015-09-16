@@ -1,0 +1,15 @@
+TODO
+
+Stories
+Chat Dialog for npcs
+
+Inventory/menu system
+
+Level design, story line etc
+
+Proper scrolling
+
+Place holder sprites, map backgrounds
+
+Tasks
+See TODOs in GameEx.java
