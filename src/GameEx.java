@@ -1,3 +1,5 @@
+import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -10,6 +12,8 @@ import java.awt.Canvas;
 import java.io.File;
 import java.io.IOException;
 
+
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -51,42 +55,53 @@ public class GameEx extends Canvas implements Runnable {
 	private Thread thread;
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-	private BufferedImage spriteSheet = null; //this will be used for the sprite sheet when we get one
-	private BufferedImage player;
+	private BufferedImage spriteSheet = null, backGround = null; //this will be used for the sprite sheet when we get one
 	//private BufferedImage bird; //this is used in the sprite sheet stuff
 	
 
 	public Rectangle screen, bird, wall, top, bot, left, right, cat;
-	public Rectangle bounds; 
+	public Rectangle bounds, outerBounds; 
 	public Rectangle[][] blocks = new Rectangle[2][5];
+	public Rectangle[] squares = new Rectangle[100];
+	public Rectangle[] squaresIn = new Rectangle[100];
 
-	// we don't need a up and down speed. We can just have a vertical speed
-	// that can be positive and negative, we can also do that with left/right
-	private int xPos = 550 , yPos = 100, spdU, spdD, spdR, spdL, lvl = 0, jump = 5;
+	private int spdU, spdD, spdR, spdL, lvl = 0, jump = 5, screenx=200, screeny=200, lenIn;
 	private boolean[] keys = new boolean[256];
 	private boolean  swap, gotSeed ;
-	BufferedImage birdImg, seeds, wood, catImg;
-	
-	
-	// This will be utilized with the sprite sheet
+	BufferedImage birdImg, seeds, wood, catImg, back;
 	
 	private Player p;
 	
 	public void init(){
+	    // Here I create a bunch of blocks and put them at semi random heights just to jump on.
+	    
+	    
+	    for (int i = 1; i < 100; i++){
+	        double r = Math.random()*50;
+	        System.out.println(r);
+	        squares[i]=new Rectangle(100*i, (int)(600+r), 25, 25 ); 
+	    }
+
+	    squares[0]=new Rectangle(0, 600, 500, 25);
 	    BufferedImageLoader loader = new BufferedImageLoader();
 	    try{	        
-	        spriteSheet = loader.loadImage("/sprite_sheet.png");	        
+	        spriteSheet = loader.loadImage("/sprite_sheet.png");
+	        backGround = loader.loadImage("/mario.png");
 	    }catch(IOException e){
 	        e.printStackTrace();
 	    }
 	    
 	    addKeyListener(new KeyInput(this));
 	    
+        BackGround bg = new BackGround(getBackGround());
+        back = bg.grabImage(0, 0, 1500, 1500);
 	    p = new Player(500, 300, this);
 
 	}
 	
-	// I barely understand how the next bit works until after run() so don't worry
+
+
+    // I barely understand how the next bit works until after run() so don't worry
 	private synchronized void start(){
 		if(running)
 			return;
@@ -155,6 +170,7 @@ public class GameEx extends Canvas implements Runnable {
 
 		cat      = new Rectangle(50,  410, 10, 10);
 		bounds   = new Rectangle(64, 64, WIDTH-128, HEIGHT-128);
+		outerBounds   = new Rectangle(-50, -50, WIDTH+50, HEIGHT+50);
 		gotSeed  = false;
 		
 		// IT IS VERY IMPORTANT THAT THEY ARE THE SAME SIZE. FILL UNUSED SLOTS WITH EMPTY RECTANGLES
@@ -193,7 +209,7 @@ public class GameEx extends Canvas implements Runnable {
 	        Clip clip = AudioSystem.getClip();
 	        // Open audio clip and load samples from the audio input stream.
 	        clip.open(audioIn);
-	        clip.start();
+	        //clip.start();
 	        //clip.loop(Clip.LOOP_CONTINUOUSLY);// Turning this off for now because my ears
 	     } catch (UnsupportedAudioFileException e) {
 	        e.printStackTrace();
@@ -216,10 +232,27 @@ public class GameEx extends Canvas implements Runnable {
 	       
 	       Graphics g = bs.getDrawGraphics();
 
-	       //draws the black screen
-	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+	       //stop scrolling so you dont end up off the screen
 
-	       Graphics2D g2d = (Graphics2D)g;
+	       if (screenx < 5)
+	           screenx=5;
+	       else if (screenx > 790)
+	           screenx=790;
+	              
+	       if (screeny < 5)
+	           screeny=5;
+           else if (screeny > 975)
+               screeny=975;
+	       
+	       
+
+
+           Graphics2D g2d = (Graphics2D)g;
+           //draw the background
+	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+	       g.drawImage(back, -screenx, -screeny, 1500, 1500, this);
+
+
 	       
 	       
 	       // bird is 50 wide by 48 height
@@ -236,43 +269,32 @@ public class GameEx extends Canvas implements Runnable {
 	       
 	       //draw the player
            p.render(g);
-	       
-	       
-	       // The level stuff needs to be contained it its own method incase it gets big.  its bugged
-	       if (p.getX()<60 && p.getY()>164 && lvl==0){
-	           lvl=1;
-	           p.setX(590);
-	           p.setY(150);
-	       } 
-	       if (p.getY()>400 && lvl==1){
-	           lvl=0;
-	           p.setX(590);
-	           p.setY(390);
-	       } 
-	       if(p.getX()==614 && p.getY()==166 && lvl==1){
-	           lvl=0;
-	           p.setX(70);
-	           p.setY(164);
-	       } 
-	       if(lvl == 1 && !gotSeed){
-	           g.drawImage(seeds, 50,  50, null);
-	           if (getX()==50 && getY() == 50){
-	               gotSeed = true;
-	           }
-	       } 
-	       
-	       System.out.println("x = " + p.getX() + " y = " + p.getY());
+	             
+	       //System.out.println("x = " + p.getX() + " y = " + p.getY());
 	       
 	       
 	       
 	       // Apply textures and draw the blocks
 	       TexturePaint woodtp = new TexturePaint(wood, new Rectangle(0, 0, 50, 50));
 	       g2d.setPaint(woodtp);     
-	       for(int i=0; i < blocks[0].length ; i++){
-	           g2d.fill(blocks[lvl][i]);
-	       }
+
 	       
-	       g2d.draw(bounds);
+	       //System.out.println(screenx + " y = " + screeny);
+	       
+	       // This loop looks at all the blocks on the level and makes an array of the ones that would be in the screen
+           lenIn=0;                   
+           for(int i=0; i < 100 ; i++){
+               Rectangle test = new Rectangle(squares[i].x - screenx, squares[i].y -screeny, squares[i].width, squares[i].height);
+               if(test.intersects(outerBounds)){                  
+                   squaresIn[lenIn] = test; 
+                   lenIn++;                  
+               }
+           }
+	       
+	       // draws the squares that are on the screen. 
+           for(int i=0; i <lenIn; i++){
+               g2d.fill(squaresIn[i]);  
+           }
 	       g.dispose();
 	       bs.show();
 	   }
@@ -286,10 +308,14 @@ public class GameEx extends Canvas implements Runnable {
 		 // The default amount of pixels movement in the specified directions
 		 spdU = 32; spdD = 8; spdR = 8; spdL = 8;
 		 
+         for(int i=0; i < lenIn ; i++){
+             check(squaresIn[i]);
+         }
+		 
 		 // Loop through the objects in the map and see if the any of them interesect with the collision boxes
-		 for(int i = 0 ; i < blocks[1].length; i++){
+		 /*for(int i = 0 ; i < blocks[1].length; i++){
 			 check(blocks[lvl][i]);
-		 }
+		 }*/
 		 
 		// I needed a separate check for the blocks bounds since we are always IN the screen
 		 boundary(bounds);		
@@ -313,37 +339,54 @@ public class GameEx extends Canvas implements Runnable {
 		// If the w key or the up key is pressed, jump
 		// If the up direction key is used
 	    if(keys[KeyEvent.VK_W] || keys[KeyEvent.VK_UP]){	  
-	    	playJump(); 	    	// Play the jump sound!
+	    	//playJump(); 	    	// Play the jump sound!
 	    	// This is where we check to see if we're on the ground or a surface. 
-	    	for(int i = 0 ; i < blocks[1].length; i++){
-		    	if(p.getB().intersects(blocks[lvl][i])) { // if it intersects with a block
-					jump = 0;
-		    	} else if (!p.getB().intersects(bounds)){ // if it intersects with the bottom of the map
-		    		jump = 0;
-		            
-		    	}
 
-	    	}	
+	        
+	        for(int i = 0 ; i < lenIn; i++){
+                if(p.getB().intersects(squaresIn[i])) { // if it intersects with a block
+                    jump = 0;
+                    System.out.println("jump!");
+                } else if (!p.getB().intersects(bounds)){ // if it intersects with the bottom of the map
+                    jump = 0;
+                    
+                }
+
+            }   
+	        
+	        
+	          //screeny -= 3;
 	    	keys[KeyEvent.VK_UP]=false; keys[KeyEvent.VK_W]=false;
 
 		}
 	    
 	    // We will only need this if the bird is going into a hole or some other reason to go down
 	    if(keys[KeyEvent.VK_S] || keys[KeyEvent.VK_DOWN]){
-	        p.setVelY(spdD);
+	        //p.setVelY(spdD);
+	        screeny += 3;
+
 	    } 
 
 	    // If the left direction key is used
 	    if(keys[KeyEvent.VK_A] || keys[KeyEvent.VK_LEFT]){
-	        p.setVelX(-spdL);
-	    }
+	        if(p.getX() < 200) {
+	            screenx -= 3;
+	            p.setVelX(0);
+	        } else if (p.getX() > 200)            
+	            p.setVelX(-spdL); 	                 
+	        }        
 	    
 
 	    // If the right direction key is used
 	    if(keys[KeyEvent.VK_D] || keys[KeyEvent.VK_RIGHT]){
-	        p.setVelX(spdR);
+            if(p.getX() > 550) {
+                screenx += 3;
+                p.setVelX(0);
+            } else if (p.getX() < 550)            
+                p.setVelX(spdR);                    
+            }   
 
-	    } 
+	     
 	    // Always set the birds speed to be downwards
 	    // This acts as gravity
 	   // p.setVelY(spdD);
@@ -483,5 +526,8 @@ public class GameEx extends Canvas implements Runnable {
 	public BufferedImage getSpriteSheet(){
 	    return spriteSheet;
 	}
+    public BufferedImage getBackGround() {
+    return backGround;
+    }
 
 }
