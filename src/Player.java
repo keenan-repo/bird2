@@ -16,10 +16,13 @@ public class Player {
     
     private BufferedImage player;
     
+    private Textures tex;
     
-    public Player(double x, double y, GameEx game){
+    
+    public Player(double x, double y, Textures tex){
         this.x = x;
         this.y = y;
+        this.tex = tex;
         
         T = new Rectangle((int)x, (int)y - 8, 32, 8);
         B = new Rectangle((int)x, (int)y + 33, 32, 8);
@@ -28,8 +31,7 @@ public class Player {
         
        
         
-        SpriteSheet ss = new SpriteSheet(game.getSpriteSheet());
-        player = ss.grabImage(1,1,32,32);
+
     }
     
     public void tick(){
@@ -54,7 +56,7 @@ public class Player {
         } */
         
         Graphics2D g2d = (Graphics2D)g;
-        g.drawImage(player, (int)x, (int)y, null);
+        g.drawImage(tex.player, (int)x, (int)y, null);
         /*g2d.draw(B);
         g2d.draw(T);
         g2d.draw(R);

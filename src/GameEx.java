@@ -67,11 +67,12 @@ public class GameEx extends Canvas implements Runnable {
 	private int MAX_JUMP=24;
 	private int spdU, spdD, spdR, spdL, lvl = 0, jump = MAX_JUMP+1, screenx=200, screeny=200, lenIn;
 	private boolean[] keys = new boolean[256];
-	private boolean  swap, gotSeed ;
+	private boolean  swap, gotSeed, is_shooting=false ;
 
 	
 	private Player p;
 	private Controller c;
+	private Textures tex;
 	
 	public void init(){
 
@@ -104,12 +105,14 @@ public class GameEx extends Canvas implements Runnable {
 	    
 	    addKeyListener(new KeyInput(this));
 	    
+	    tex = new Textures(this);
+	    
 	    
 	    // Sets up the background to be loaded
         BackGround bg = new BackGround(getBackGround());
         back = bg.grabImage(0, 0, 1500, 1500);
-	    p = new Player(500, 100, this);
-	    c = new Controller(this);
+	    p = new Player(500, 100, tex);
+	    c = new Controller(this, tex);
 
 	}
 	
@@ -275,10 +278,10 @@ public class GameEx extends Canvas implements Runnable {
 		 // the collision detection needs work, all the movement in general does
 		 // TODO fix collision detection, make it smoother
 		 if (!p.getB().intersects(bounds)){
-		     screeny += 8;
+		     screeny += 4;
 		     p.setVelY(-4);
 		 } else if (!p.getT().intersects(bounds)){
-	             screeny -= 8;
+	             screeny -= 4;
 	             p.setVelY(4);
 	         }
 	 }
@@ -354,9 +357,9 @@ public class GameEx extends Canvas implements Runnable {
                 spdD=0;                   
             }
         } */
-	    if (keys[KeyEvent.VK_SPACE]){
-	        c.addBullet(new Bullet(p.getX(), p.getY(), this));
-	        System.out.println("test");
+	    if (keys[KeyEvent.VK_SPACE] && !is_shooting){
+	        c.addBullet(new Bullet(p.getX(), p.getY(), tex));
+	        is_shooting = true;
 	        keys[KeyEvent.VK_SPACE]=false;
 	    }
 	}
@@ -379,6 +382,9 @@ public class GameEx extends Canvas implements Runnable {
 
 	public void keyReleased(KeyEvent e) {
 	    keys[e.getKeyCode()] = false;
+	    if (e.getKeyCode() == KeyEvent.VK_SPACE){
+	        is_shooting = false;
+	    }
 	    p.setVelX(0);
 	    //p.setVelY(0);
 //		    swap=true; // I think this is why the bird changes direction when you don't want to
