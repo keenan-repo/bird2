@@ -45,8 +45,8 @@ import javax.swing.JFrame;
 @SuppressWarnings("serial")
 public class GameEx extends Canvas implements Runnable {
 	
-	public static final int WIDTH = 700;
-	public static final int HEIGHT = WIDTH / 12 * 9;
+	public static final int WIDTH = 1080;
+	public static final int HEIGHT = WIDTH / 3 * 2;
 	public static final int SCALE = 1;
 	public final String TITLE = "Bird Game";
 	
@@ -66,7 +66,7 @@ public class GameEx extends Canvas implements Runnable {
 	public Rectangle[] blocksOnScreen = new Rectangle[100];
    
 	private int MAX_JUMP=24;
-	private int spdU, spdD, spdR, spdL, lvl = 0, jump = MAX_JUMP+1, screenx=200, screeny=200, lenIn;
+	private int spdU, spdD, spdR, spdL, lvl = 0, jump = MAX_JUMP+1, screenx=0, screeny=0, lenIn, sn=0;
 	private boolean[] keys = new boolean[256];
 	private boolean  swap, gotSeed, is_shooting=false ;
 
@@ -78,8 +78,7 @@ public class GameEx extends Canvas implements Runnable {
 	private DrawLevel l;
 	
 	public void init(){
-
-	    
+    
 	    // Here I create a bunch of blocks and put them at semi random heights just to jump on.
 	    // This is where the level needs to be built. 
 	    // another class for this would be nice. Not sure how we would do that though. 
@@ -91,9 +90,9 @@ public class GameEx extends Canvas implements Runnable {
 	    blocks[0][0]=new Rectangle(0, 600, 500, 25); // lower
 	    blocks[0][1]=new Rectangle(620, 530, 500, 25); //top
 	    blocks[0][4]=new Rectangle(620, 400, 250, 25); //topest
-	    blocks[0][3]=new Rectangle(620, 700, 700, 75); // lowest
-	    
-	    
+	    blocks[0][3]=new Rectangle(620, 700, 2000, 75); // lowest
+	    blocks[0][5]=new Rectangle(2620, 530, 2000, 25); //top
+	    	    
 	    // This is a better img loader, i think everything should be loaded. It only loads the file once.
 	    //TODO those should go in the sprite sheet
 	    BufferedImageLoader loader = new BufferedImageLoader();
@@ -113,9 +112,9 @@ public class GameEx extends Canvas implements Runnable {
 	    
 	    
 	    // Sets up the background to be loaded
-	    p = new Player(500, 100, tex);
+	    p = new Player(150, 500, tex);
 	    c = new Controller(this, tex);
-	    l = new DrawLevel(0, 0, bg);
+	    l = new DrawLevel(-screenx, -screeny, bg);
 
 	}
 	
@@ -204,27 +203,50 @@ public class GameEx extends Canvas implements Runnable {
 
 	       if (screenx < 5)
 	           screenx=5;
-	       else if (screenx > 790)
-	           screenx=790;
+	       /*else if (screenx > 790)
+	           screenx=790;*/
 	              
 	       if (screeny < 5)
 	           screeny=5;
-           else if (screeny > 975)
-               screeny=975;
+          /* else if (screeny > 975)
+               screeny=975;*/
 	       
 	       
            Graphics2D g2d = (Graphics2D)g;
            //draw the background
 	       g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
 	       //g.drawImage(backGround, -screenx, -screeny, 1500, 1500, this);
-
 	       
 	       // bird is 50 wide by 48 height
 	       // this turns the bird. It's kinda broken right now and he spins everytime.
 	       // can't figure out how to fix it. Ideas?
 
-	       //draw the player
-           l.render(g);
+        //background helpppppppppppppppppppppppppppppp need to generalize this
+	       /*if( screenx > WIDTH*sn){
+	           //sn++;
+	           l.setY(-screeny);
+	           l.setX(-screenx+WIDTH*sn);
+	           l.render(g);
+	       }*/
+	       
+	       if(screenx < WIDTH){
+               l.setY(-screeny);
+               l.setX(-screenx);
+               l.render(g);
+	       }   if(screenx > 0){
+               l.setY(-screeny);
+               l.setX(-screenx+WIDTH);
+               l.render(g);
+           }  if (screenx > WIDTH) {
+               l.setY(-screeny);
+               l.setX(-screenx+WIDTH*2);
+               l.render(g);
+           } if (screenx > WIDTH*2) {
+               l.setY(-screeny);
+               l.setX(-screenx+WIDTH*3);
+               l.render(g);
+           }
+
 	       p.render(g);
            c.render(g);
 
@@ -238,7 +260,7 @@ public class GameEx extends Canvas implements Runnable {
 	       g2d.setPaint(woodtp);     
 
 	       
-	       //System.out.println(screenx + " y = " + screeny);
+	       System.out.println("x = " + screenx + " y = " + screeny + " count = " + sn);
 	       
 	       // This loop looks at all the blocks on the level and makes an array of the ones that would be in the screen
 	       // it tests the blocks to see if they intersect with where the screen is
@@ -335,20 +357,20 @@ public class GameEx extends Canvas implements Runnable {
 
 	    // If the left direction key is used
 	    if(keys[KeyEvent.VK_A] || keys[KeyEvent.VK_LEFT]){
-	        if(p.getX() < 200) {
+	        if(p.getX() < 100) {
 	            screenx -= 3;
 	            p.setVelX(0);
-	        } else if (p.getX() > 200)            
+	        } else if (p.getX() > 100)            
 	            p.setVelX(-spdL); 	                 
 	        }        
 	    
 	    // If the right direction key is used
 	    if(keys[KeyEvent.VK_D] || keys[KeyEvent.VK_RIGHT]){
 	        swap=true;
-            if(p.getX() > 550) {
+            if(p.getX() > 900) {
                 screenx += 3;
                 p.setVelX(0);
-            } else if (p.getX() < 550)            
+            } else if (p.getX() < 900)            
                 p.setVelX(spdR);                    
             }   
 
