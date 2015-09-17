@@ -18,10 +18,10 @@ public class Player {
         this.x = x;
         this.y = y;
         
-        T = new Rectangle((int)x, (int)y - 16, 32, 16);
-        B = new Rectangle((int)x, (int)y + 34, 32, 16);
-        R = new Rectangle((int)x+32, (int)y, 16, 32);
-        L = new Rectangle((int)x-16, (int)y, 16, 32);
+        T = new Rectangle((int)x, (int)y - 8, 32, 8);
+        B = new Rectangle((int)x, (int)y + 33, 32, 8);
+        R = new Rectangle((int)x+32, (int)y, 8, 32);
+        L = new Rectangle((int)x-8, (int)y, 8, 32);
         
        
         
@@ -32,11 +32,11 @@ public class Player {
     public void tick(){
         x += velX;
         y += velY;
-        T.x=(int)x; T.y=(int)y-16;
-        B.x=(int)x; B.y=(int)y+32;
+        T.x=(int)x; T.y=(int)y-8;
+        B.x=(int)x; B.y=(int)y+33;
         
-        R.x=(int)x+32; R.y=(int)y;
-        L.x=(int)x-16; L.y=(int)y;
+        R.x=(int)x+33; R.y=(int)y;
+        L.x=(int)x-8; L.y=(int)y;
 
     }
     
