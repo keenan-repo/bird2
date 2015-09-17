@@ -71,6 +71,7 @@ public class GameEx extends Canvas implements Runnable {
 
 	
 	private Player p;
+	private Controller c;
 	
 	public void init(){
 
@@ -108,6 +109,7 @@ public class GameEx extends Canvas implements Runnable {
         BackGround bg = new BackGround(getBackGround());
         back = bg.grabImage(0, 0, 1500, 1500);
 	    p = new Player(500, 100, this);
+	    c = new Controller(this);
 
 	}
 	
@@ -140,7 +142,7 @@ public class GameEx extends Canvas implements Runnable {
         setFocusable(true);
         init();
         long lastTime = System.nanoTime();
-        final double amountOfTicks = 70.0;
+        final double amountOfTicks = 120.0;
         double ns = 1000000000 / amountOfTicks;
         double delta = 0;
         int updates = 0;
@@ -172,6 +174,7 @@ public class GameEx extends Canvas implements Runnable {
    private void tick() {
        look();
        p.tick();
+       c.tick();
        // TODO create the level tracker and put it here. This will start out by switching levels when the bird is in the 
        // right spot. Later it will maybe handle moving the screen along with the bird.
        processInput();
@@ -212,17 +215,10 @@ public class GameEx extends Canvas implements Runnable {
 	       // bird is 50 wide by 48 height
 	       // this turns the bird. It's kinda broken right now and he spins everytime.
 	       // can't figure out how to fix it. Ideas?
-	      /* AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-	       
-	       if(swap && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
-	           tx.translate(-birdImg.getWidth(null), 0);
-	           AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-	           birdImg = op.filter(birdImg, null);
-	           swap=false;
-	       } */
-	       
+
 	       //draw the player
            p.render(g);
+           c.render(g);
 	             
 	       //System.out.println("x = " + p.getX() + " y = " + p.getY());
 	       
@@ -266,7 +262,7 @@ public class GameEx extends Canvas implements Runnable {
 	void look() {
 
 		 // The default amount of pixels movement in the specified directions
-		 spdU = 8; spdD = 4; spdR = 8; spdL = 8;
+		 spdU = 8; spdD = 2; spdR = 4; spdL = 4;
 		 
          for(int i=0; i < lenIn ; i++){
              check(blocksOnScreen[i]);
@@ -325,7 +321,6 @@ public class GameEx extends Canvas implements Runnable {
 	    // We will only need this if the bird is going into a hole or some other reason to go down
 	    if(keys[KeyEvent.VK_S] || keys[KeyEvent.VK_DOWN]){
 	        //p.setVelY(spdD);
-	        screeny += spdD/2;
 
 	    } 
 
@@ -340,6 +335,7 @@ public class GameEx extends Canvas implements Runnable {
 	    
 	    // If the right direction key is used
 	    if(keys[KeyEvent.VK_D] || keys[KeyEvent.VK_RIGHT]){
+	        swap=true;
             if(p.getX() > 550) {
                 screenx += 3;
                 p.setVelX(0);
@@ -358,6 +354,11 @@ public class GameEx extends Canvas implements Runnable {
                 spdD=0;                   
             }
         } */
+	    if (keys[KeyEvent.VK_SPACE]){
+	        c.addBullet(new Bullet(p.getX(), p.getY(), this));
+	        System.out.println("test");
+	        keys[KeyEvent.VK_SPACE]=false;
+	    }
 	}
 	
 	private void processEnemy(){

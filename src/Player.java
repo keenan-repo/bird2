@@ -2,6 +2,9 @@
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 
@@ -41,6 +44,15 @@ public class Player {
     }
     
     public void render(Graphics g){
+        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+        
+        /*if(velX>0 && (keys[KeyEvent.VK_LEFT] || keys[KeyEvent.VK_RIGHT])){
+            tx.translate(-birdImg.getWidth(null), 0);
+            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+            birdImg = op.filter(birdImg, null);
+            swap=false;
+        } */
+        
         Graphics2D g2d = (Graphics2D)g;
         g.drawImage(player, (int)x, (int)y, null);
         /*g2d.draw(B);
