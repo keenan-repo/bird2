@@ -13,8 +13,17 @@ public class Enemy {
     }
     
     public void tick(){
-        x += 1;
-        
+        boolean left = false;
+        if( x < 300 && !left){
+            x += 1;
+        } else if (x >= 300) {
+            left = true;
+        }
+        if (x > 50 && left){
+            x -= 1;
+        } else if (x <= 50){
+            left = false;
+        }
     }
     
     public void render(Graphics g){

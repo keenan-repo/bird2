@@ -1,0 +1,46 @@
+-----------Main Character----------
+
+1. facing left
+
+2. facing right
+
+3. walking left step 1
+
+4. walking left step 2 (We could make more steps for smoother animation)
+
+5. walking right 1
+
+6. walking right 2
+
+7. jumping
+
+8. falling
+
+9. attacking (shooting)
+
+
+-----------Enemies--------
+
+10-18 Same as main
+
+Projectiles
+
+19. seeds
+
+20. rocks
+
+21. fire balls
+
+22. lasers????? (not sure how you'd do this)
+
+-----------Textures---------
+
+23. ground: grass
+
+24. ground: dirt
+
+25. wood?
+
+26. ice?
+
+

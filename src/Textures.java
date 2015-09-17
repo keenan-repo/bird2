@@ -9,7 +9,6 @@ public class Textures {
     
     public Textures(GameEx game){
         ss = new SpriteSheet(game.getSpriteSheet());
-        
         getTextures();
         
         
@@ -19,6 +18,5 @@ public class Textures {
         player = ss.grabImage(1, 1, 32, 32);
         missle = ss.grabImage(2, 1, 32, 32);
         enemy = ss.grabImage(3, 1, 32, 32);
-        
     }
 }

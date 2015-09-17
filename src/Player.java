@@ -14,8 +14,6 @@ public class Player {
     private double y, velY = 0;
     private Rectangle T, B, L, R;
     
-    private BufferedImage player;
-    
     private Textures tex;
     
     
@@ -28,10 +26,6 @@ public class Player {
         B = new Rectangle((int)x, (int)y + 33, 32, 8);
         R = new Rectangle((int)x+32, (int)y, 8, 32);
         L = new Rectangle((int)x-8, (int)y, 8, 32);
-        
-       
-        
-
     }
     
     public void tick(){

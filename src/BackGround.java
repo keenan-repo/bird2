@@ -1,18 +1,19 @@
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImage;
 
 
 public class BackGround {
-    private BufferedImage image;
     
-    public BackGround(BufferedImage image){
-        this.image = image;
-    }
-    public BufferedImage grabImage(int x, int y, int width, int height){
-        BufferedImage img = image.getSubimage(x, y, width, height);
-        return img;
+    public BufferedImage Level_1;
+    
+    private BufferedImage ss;
+    
+    public BackGround(GameEx game){
+        ss = game.getLevel_1();
+        getMap();
+        
     }
     
+    private void getMap(){
+        Level_1 = ss;
+    }
 }
-
-

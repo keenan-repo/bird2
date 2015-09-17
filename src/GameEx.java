@@ -55,7 +55,8 @@ public class GameEx extends Canvas implements Runnable {
 	private Thread thread;
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-	private BufferedImage spriteSheet = null, backGround = null; 
+	private BufferedImage spriteSheet = null;
+	private BufferedImage Level_1 = null; 
     BufferedImage birdImg, seeds, wood, catImg, back; //this will all be gone after a sprite sheet
 	
 	public Rectangle screen, bird, wall, cat;
@@ -73,6 +74,8 @@ public class GameEx extends Canvas implements Runnable {
 	private Player p;
 	private Controller c;
 	private Textures tex;
+	private BackGround bg;
+	private DrawLevel l;
 	
 	public void init(){
 
@@ -82,7 +85,6 @@ public class GameEx extends Canvas implements Runnable {
 	    // another class for this would be nice. Not sure how we would do that though. 
 	    for (int i = 1; i < 100; i++){
 	        double r = Math.random()*50;
-	        System.out.println(r);
 	        blocks[0][i]=new Rectangle(100*i, (int)(600+r), 0, 0 ); 
 	    }
 
@@ -97,8 +99,9 @@ public class GameEx extends Canvas implements Runnable {
 	    BufferedImageLoader loader = new BufferedImageLoader();
 	    try{	        
 	        spriteSheet = loader.loadImage("/sprite_sheet.png");
-	        backGround = loader.loadImage("/mario.png");
+	        Level_1 = loader.loadImage("/BackGround.png");
 	        wood = loader.loadImage("/wood.png");
+	 
 	    }catch(IOException e){
 	        e.printStackTrace();
 	    }
@@ -106,13 +109,13 @@ public class GameEx extends Canvas implements Runnable {
 	    addKeyListener(new KeyInput(this));
 	    
 	    tex = new Textures(this);
+	    bg = new BackGround(this);
 	    
 	    
 	    // Sets up the background to be loaded
-        BackGround bg = new BackGround(getBackGround());
-        back = bg.grabImage(0, 0, 1500, 1500);
 	    p = new Player(500, 100, tex);
 	    c = new Controller(this, tex);
+	    l = new DrawLevel(0, 0, bg);
 
 	}
 	
@@ -178,6 +181,7 @@ public class GameEx extends Canvas implements Runnable {
        look();
        p.tick();
        c.tick();
+       l.tick();
        // TODO create the level tracker and put it here. This will start out by switching levels when the bird is in the 
        // right spot. Later it will maybe handle moving the screen along with the bird.
        processInput();
@@ -220,8 +224,10 @@ public class GameEx extends Canvas implements Runnable {
 	       // can't figure out how to fix it. Ideas?
 
 	       //draw the player
-           p.render(g);
+           l.render(g);
+	       p.render(g);
            c.render(g);
+
 	             
 	       //System.out.println("x = " + p.getX() + " y = " + p.getY());
 	       
@@ -503,8 +509,9 @@ public class GameEx extends Canvas implements Runnable {
 	public BufferedImage getSpriteSheet(){
 	    return spriteSheet;
 	}
-    public BufferedImage getBackGround() {
-    return backGround;
+
+    public BufferedImage getLevel_1() {
+        return Level_1;
     }
 
 }
